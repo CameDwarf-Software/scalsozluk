@@ -1,8 +1,7 @@
 let items = [];
 let displayedItems = [];
-let draggedItem = null;
-let offsetX = 0;
-let offsetY = 0;
+let selectedItem = null;
+let matches = new Map();
 
 fetch("data.json")
   .then(r => r.json())
@@ -12,129 +11,82 @@ fetch("data.json")
   });
 
 function startGame() {
-  const area = document.querySelector(".area");
-  const dropzonesDiv = document.querySelector(".dropzones");
-  area.innerHTML = "";
-  dropzonesDiv.innerHTML = "";
+  const itemsDiv = document.querySelector(".items");
+  const meaningsDiv = document.querySelector(".meanings");
+  itemsDiv.innerHTML = "";
+  meaningsDiv.innerHTML = "";
+  matches.clear();
+  selectedItem = null;
   document.getElementById("result").textContent = "";
 
-  // 4 rastgele atasözü seç
-  displayedItems = [];
-  let tempItems = [...items];
-  for (let i=0; i<4; i++) {
-    let idx = Math.floor(Math.random()*tempItems.length);
-    displayedItems.push(tempItems.splice(idx,1)[0]);
-  }
-
-  // Drop alanları için anlamları rastgele sırala
-  let meanings = displayedItems.map(i => i.meaning);
+  displayedItems = shuffleArray([...items]).slice(0,4);
+  let meanings = displayedItems.map(i=>i.meaning);
   meanings = shuffleArray(meanings);
 
-  // Drop alanlarını oluştur
-  meanings.forEach(m => {
+  displayedItems.forEach(obj=>{
     const div = document.createElement("div");
-    div.className = "dropzone";
-    div.dataset.meaning = m;
-    div.textContent = m;
-    dropzonesDiv.appendChild(div);
+    div.className="item";
+    div.textContent = obj.name;
+    div.dataset.meaning=obj.meaning;
+    div.addEventListener("click",()=> selectItem(div));
+    itemsDiv.appendChild(div);
   });
 
-  // Atasözü kutularını rastgele konumlandır
-  displayedItems.forEach((obj, index) => {
+  meanings.forEach(m=>{
     const div = document.createElement("div");
-    div.className = "item";
-    div.textContent = obj.name;
-    div.style.left = Math.random()*(area.clientWidth - 120) + "px";
-    div.style.top = Math.random()*(area.clientHeight - 50) + "px";
-    enableDrag(div);
-    area.appendChild(div);
+    div.className="meaning";
+    div.textContent = m;
+    div.addEventListener("click",()=> selectMeaning(div));
+    meaningsDiv.appendChild(div);
   });
 }
 
-// Shuffle helper
-function shuffleArray(array) {
-  for (let i=array.length-1;i>0;i--){
+function selectItem(div){
+  document.querySelectorAll(".item").forEach(i=>i.classList.remove("selected"));
+  div.classList.add("selected");
+  selectedItem = div;
+}
+
+function selectMeaning(div){
+  if(!selectedItem) return;
+  matches.set(selectedItem.dataset.meaning, div);
+  selectedItem.classList.add("matched");
+  div.classList.add("matched");
+  selectedItem.classList.remove("selected");
+  selectedItem = null;
+}
+document.getElementById("resetSelectionsBtn").addEventListener("click", ()=>{
+  // Tüm item ve meaning kutularındaki seçimleri ve renkleri temizle
+  document.querySelectorAll(".item, .meaning").forEach(el => {
+    el.classList.remove("selected", "matched", "correct", "wrong");
+  });
+  matches.clear();
+  selectedItem = null;
+  document.getElementById("result").textContent = "";
+});
+
+
+document.getElementById("checkBtn").addEventListener("click", ()=>{
+  let correct=0;
+  matches.forEach((meaningDiv, meaning)=>{
+    if(meaningDiv.textContent===meaning){
+      meaningDiv.classList.add("correct");
+      correct++;
+    } else {
+      meaningDiv.classList.add("wrong");
+    }
+  });
+  document.getElementById("result").textContent=`Doğru: ${correct} / 4`;
+});
+
+document.getElementById("restartBtn").addEventListener("click", ()=>{
+  startGame();
+});
+
+function shuffleArray(array){
+  for(let i=array.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [array[i],array[j]]=[array[j],array[i]];
   }
   return array;
 }
-
-function enableDrag(el) {
-  el.addEventListener("mousedown", startDrag);
-  document.addEventListener("mousemove", onDrag);
-  document.addEventListener("mouseup", stopDrag);
-
-  el.addEventListener("touchstart", startDragTouch,{passive:false});
-  document.addEventListener("touchmove", onDragTouch,{passive:false});
-  document.addEventListener("touchend", stopDragTouch);
-}
-
-function startDrag(e){
-  draggedItem = e.target;
-  draggedItem.classList.add("dragging");
-  offsetX = e.clientX - draggedItem.offsetLeft;
-  offsetY = e.clientY - draggedItem.offsetTop;
-}
-
-function onDrag(e){
-  if(!draggedItem) return;
-  draggedItem.style.left = (e.clientX - offsetX)+"px";
-  draggedItem.style.top = (e.clientY - offsetY)+"px";
-}
-
-function stopDrag(){
-  if(!draggedItem) return;
-  draggedItem.classList.remove("dragging");
-  draggedItem = null;
-}
-
-function startDragTouch(e){
-  e.preventDefault();
-  draggedItem = e.target;
-  draggedItem.classList.add("dragging");
-  const t = e.touches[0];
-  offsetX = t.clientX - draggedItem.offsetLeft;
-  offsetY = t.clientY - draggedItem.offsetTop;
-}
-
-function onDragTouch(e){
-  if(!draggedItem) return;
-  e.preventDefault();
-  const t = e.touches[0];
-  draggedItem.style.left = (t.clientX - offsetX)+"px";
-  draggedItem.style.top = (t.clientY - offsetY)+"px";
-}
-
-function stopDragTouch(){
-  if(!draggedItem) return;
-  draggedItem.classList.remove("dragging");
-  draggedItem = null;
-}
-
-// Kontrol butonu
-document.getElementById("checkBtn").addEventListener("click",()=>{
-  const dropzones = document.querySelectorAll(".dropzone");
-  let correct = 0;
-
-  dropzones.forEach(zone=>{
-    const item = Array.from(document.querySelectorAll(".item")).find(i=>{
-      const rectItem=i.getBoundingClientRect();
-      const rectZone=zone.getBoundingClientRect();
-      return !(rectItem.right<rectZone.left||rectItem.left>rectZone.right||rectItem.bottom<rectZone.top||rectItem.top>rectZone.bottom);
-    });
-    if(item){
-      const match = displayedItems.find(d=>d.name===item.textContent);
-      if(match.meaning===zone.dataset.meaning){
-        zone.classList.add("correct");
-        correct++;
-      } else {
-        zone.classList.add("wrong");
-        setTimeout(()=>zone.classList.remove("wrong"),800);
-      }
-    }
-  });
-
-  document.getElementById("result").textContent = `Doğru: ${correct} / 4`;
-});
-
