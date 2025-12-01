@@ -1,16 +1,7 @@
 {
-  "atasozleri": [
-    {
-      "soz": "Beyin yıkamak",
-      "anlam": "Kişiyi kendi düşüncelerinden koparıp başka bir görüşü benimsetmek için türlü yollarla etkilemek."
-    },
-    {
-      "soz": "Damlaya damlaya göl olur",
-      "anlam": "Küçük birikimlerin sonunda büyük sonuçlara ulaşılacağını anlatır."
-    },
-    {
-      "soz": "Acele işe şeytan karışır",
-      "anlam": "Düşünmeden aceleyle yapılan işlerde hata olacağını belirtir."
-    }
+  "items": [
+    { "name": "Beyin yıkamak", "meaning": "Kişiyi kendi görüş ve düşüncelerinden ayırıp başka bir görüşü benimsetmek", "x": 20, "y": 20 },
+    { "name": "Ayağını yorganına göre uzat", "meaning": "Gelirine göre harcama yap", "x": 20, "y": 100 },
+    { "name": "Damlaya damlaya göl olur", "meaning": "Küçük birikimler zamanla büyük olur", "x": 20, "y": 180 }
   ]
 }
