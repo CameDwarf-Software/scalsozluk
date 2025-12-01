@@ -1,67 +1,105 @@
-let data;
+let items = [];
+let draggedItem = null;
+let offsetX = 0;
+let offsetY = 0;
 
 fetch("data.json")
-    .then(res => res.json())
-    .then(json => {
-        data = json.atasozleri;
-        initGame();
-    });
+  .then(r => r.json())
+  .then(d => {
+    items = d.items;
+    loadItems();
+  });
 
-function initGame() {
-    const proverbContainer = document.getElementById("proverbs");
-    const meaningContainer = document.getElementById("meanings");
-
-    // atasözlerini sol tarafa ekle
-    data.forEach((item, i) => {
-        let div = document.createElement("div");
-        div.className = "item";
-        div.draggable = true;
-        div.dataset.index = i;
-        div.innerText = item.soz;
-
-        div.addEventListener("dragstart", dragStart);
-
-        proverbContainer.appendChild(div);
-    });
-
-    // anlamları karıştırıp sağa ekle
-    let shuffled = data
-        .map((e, i) => ({ text: e.anlam, index: i }))
-        .sort(() => Math.random() - 0.5);
-
-    shuffled.forEach(item => {
-        let zone = document.createElement("div");
-        zone.className = "dropzone";
-        zone.dataset.index = item.index;
-        zone.innerText = item.text;
-
-        zone.addEventListener("dragover", dragOver);
-        zone.addEventListener("drop", dropItem);
-
-        meaningContainer.appendChild(zone);
-    });
+function loadItems() {
+  const area = document.querySelector(".area");
+  items.forEach(obj => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.textContent = obj.name;
+    div.style.left = obj.x + "px";
+    div.style.top = obj.y + "px";
+    enableDrag(div);
+    area.appendChild(div);
+  });
 }
 
-function dragStart(e) {
-    e.dataTransfer.setData("text/plain", e.target.dataset.index);
+function enableDrag(el) {
+  // Mouse
+  el.addEventListener("mousedown", startDrag);
+  document.addEventListener("mousemove", onDrag);
+  document.addEventListener("mouseup", stopDrag);
+
+  // Touch (telefon)
+  el.addEventListener("touchstart", startDragTouch, { passive: false });
+  document.addEventListener("touchmove", onDragTouch, { passive: false });
+  document.addEventListener("touchend", stopDragTouch);
 }
 
-function dragOver(e) {
-    e.preventDefault();
+function startDrag(e) {
+  draggedItem = e.target;
+  offsetX = e.clientX - draggedItem.offsetLeft;
+  offsetY = e.clientY - draggedItem.offsetTop;
 }
 
-function dropItem(e) {
-    e.preventDefault();
+function onDrag(e) {
+  if (!draggedItem) return;
+  draggedItem.style.left = (e.clientX - offsetX) + "px";
+  draggedItem.style.top = (e.clientY - offsetY) + "px";
+}
 
-    const draggedIndex = e.dataTransfer.getData("text/plain");
-    const targetIndex = e.target.dataset.index;
+function stopDrag() {
+  if (!draggedItem) return;
+  checkDrop(draggedItem);
+  draggedItem = null;
+}
 
-    if (!draggedIndex) return;
+// Touch başlat
+function startDragTouch(e) {
+  e.preventDefault();
+  draggedItem = e.target;
+  const t = e.touches[0];
+  offsetX = t.clientX - draggedItem.offsetLeft;
+  offsetY = t.clientY - draggedItem.offsetTop;
+}
 
-    if (draggedIndex === targetIndex) {
-        e.target.classList.add("correct");
-        e.target.innerHTML += " ✔️";
-    } else {
-        e.target.classList.add("wrong");
+// Touch sürükleme
+function onDragTouch(e) {
+  if (!draggedItem) return;
+  e.preventDefault();
+  const t = e.touches[0];
+  draggedItem.style.left = (t.clientX - offsetX) + "px";
+  draggedItem.style.top = (t.clientY - offsetY) + "px";
+}
+
+// Touch bırak
+function stopDragTouch() {
+  if (!draggedItem) return;
+  checkDrop(draggedItem);
+  draggedItem = null;
+}
+
+// Drop kontrolü
+function checkDrop(item) {
+  const dropzones = document.querySelectorAll(".dropzone");
+  dropzones.forEach(zone => {
+    const rect = zone.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+    if (
+      itemRect.left < rect.right &&
+      itemRect.right > rect.left &&
+      itemRect.top < rect.bottom &&
+      itemRect.bottom > rect.top
+    ) {
+      // doğru eşleşme
+      if (zone.dataset.meaning === items.find(i => i.name === item.textContent).meaning) {
+        zone.textContent = item.textContent;
+        item.style.display = "none";
+      } else {
+        alert("Yanlış eşleşme!");
+        // isteğe bağlı: item'ı eski konumuna geri at
+        item.style.left = items.find(i => i.name === item.textContent).x + "px";
+        item.style.top = items.find(i => i.name === item.textContent).y + "px";
+      }
     }
+  });
 }
