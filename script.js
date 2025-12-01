@@ -11,46 +11,56 @@ function initGame() {
     const proverbContainer = document.getElementById("proverbs");
     const meaningContainer = document.getElementById("meanings");
 
-    // atasözlerini ekleme
+    // atasözlerini sol tarafa ekle
     data.forEach((item, i) => {
         let div = document.createElement("div");
         div.className = "item";
         div.draggable = true;
-        div.id = "p" + i;
+        div.dataset.index = i;
         div.innerText = item.soz;
 
         div.addEventListener("dragstart", dragStart);
+
         proverbContainer.appendChild(div);
     });
 
-    // anlam dropzone oluşturma
-    data
-        .map((item, i) => ({ index: i, text: item.anlam }))
-        .sort(() => Math.random() - 0.5)
-        .forEach(item => {
-            let zone = document.createElement("div");
-            zone.className = "dropzone";
-            zone.dataset.index = item.index;
-            zone.innerText = item.text;
+    // anlamları karıştırıp sağa ekle
+    let shuffled = data
+        .map((e, i) => ({ text: e.anlam, index: i }))
+        .sort(() => Math.random() - 0.5);
 
-            zone.addEventListener("dragover", e => e.preventDefault());
-            zone.addEventListener("drop", dropItem);
+    shuffled.forEach(item => {
+        let zone = document.createElement("div");
+        zone.className = "dropzone";
+        zone.dataset.index = item.index;
+        zone.innerText = item.text;
 
-            meaningContainer.appendChild(zone);
-        });
+        zone.addEventListener("dragover", dragOver);
+        zone.addEventListener("drop", dropItem);
+
+        meaningContainer.appendChild(zone);
+    });
 }
 
 function dragStart(e) {
-    e.dataTransfer.setData("id", e.target.id);
+    e.dataTransfer.setData("text/plain", e.target.dataset.index);
+}
+
+function dragOver(e) {
+    e.preventDefault();
 }
 
 function dropItem(e) {
-    let draggedId = e.dataTransfer.getData("id");
-    let draggedIndex = draggedId.replace("p", "");
+    e.preventDefault();
 
-    if (draggedIndex == e.target.dataset.index) {
+    const draggedIndex = e.dataTransfer.getData("text/plain");
+    const targetIndex = e.target.dataset.index;
+
+    if (!draggedIndex) return;
+
+    if (draggedIndex === targetIndex) {
         e.target.classList.add("correct");
-        e.target.innerText += " ✔️";
+        e.target.innerHTML += " ✔️";
     } else {
         e.target.classList.add("wrong");
     }
