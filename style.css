@@ -1,45 +1,41 @@
 body {
-    font-family: Arial, sans-serif;
-    background: #1b1b1b;
-    color: white;
-    text-align: center;
-    margin: 0;
-    padding: 20px;
+  font-family: Arial, sans-serif;
+  padding: 10px;
 }
 
-.container {
-    display: flex;
-    justify-content: center;
-    margin-top: 30px;
-    gap: 40px;
-}
-
-.left, .right {
-    width: 40%;
-    min-height: 300px;
-    padding: 20px;
-    background: #262626;
-    border-radius: 10px;
+.area {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  border: 2px solid #000;
+  margin-bottom: 20px;
+  overflow: hidden;
+  touch-action: none; /* mobilde kaydırmayı engelle */
 }
 
 .item {
-    background: #333;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 8px;
-    cursor: grab;
+  position: absolute;
+  padding: 10px 20px;
+  background: #f06;
+  color: #fff;
+  border-radius: 5px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.dropzones {
+  display: flex;
+  gap: 10px;
 }
 
 .dropzone {
-    background: #444;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 8px;
-    min-height: 40px;
-}
-.dropzone.correct {
-    background: green;
-}
-.dropzone.wrong {
-    background: red;
+  flex: 1;
+  height: 100px;
+  border: 2px dashed #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  background: #eee;
 }
