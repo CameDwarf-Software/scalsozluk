@@ -7,6 +7,7 @@ const mainMenuBtn = document.getElementById('mainMenuBtn');
 let correctCount = 0;
 const totalCount = 4;
 
+// Başlat
 function startGame() {
   itemsContainer.innerHTML = '';
   correctCount = 0;
@@ -23,10 +24,10 @@ function startGame() {
         div.className = 'item';
         div.textContent = item.name;
         div.dataset.type = data.atasozleri.includes(item) ? 'atasozu' : 'deyim';
-        div.draggable = true;
         itemsContainer.appendChild(div);
 
-        // Desktop drag
+        // Masaüstü drag
+        div.draggable = true;
         div.addEventListener('dragstart', e => {
           if(div.classList.contains('matched') || div.classList.contains('wrong')) return e.preventDefault();
           e.dataTransfer.setData('text/plain', div.dataset.type);
@@ -34,7 +35,7 @@ function startGame() {
         });
         div.addEventListener('dragend', e => div.classList.remove('selected'));
 
-        // Mobile touch
+        // Mobil touch
         div.addEventListener('touchstart', e => {
           if(div.classList.contains('matched') || div.classList.contains('wrong')) return;
           div.classList.add('selected');
@@ -44,8 +45,8 @@ function startGame() {
           e.preventDefault();
           const touch = e.touches[0];
           div.style.position = 'absolute';
-          div.style.left = touch.pageX - div.offsetWidth/2 + 'px';
-          div.style.top = touch.pageY - div.offsetHeight/2 + 'px';
+          div.style.left = touch.pageX - div.offsetWidth / 2 + 'px';
+          div.style.top = touch.pageY - div.offsetHeight / 2 + 'px';
           div.style.zIndex = 1000;
         });
 
@@ -115,6 +116,7 @@ function updateResult(){
   resultDiv.textContent = `${correctCount}/${totalCount}`;
 }
 
+// Restart & Ana Menü
 restartBtn.addEventListener('click', startGame);
 mainMenuBtn.addEventListener('click', () => { window.location.href = 'index.html'; });
 
