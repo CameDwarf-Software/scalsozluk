@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yerel Video Menüsü</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+            font-family: Arial, sans-serif;
+            color: #f0f0f0;
+        }
+
+        /* Ana Menü ve Video Alanı Stillendirmesi */
+        #main-menu, #video-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            background-color: #2c2c2c;
+        }
+        
+        /* Uyarı Metni Stili */
+        #volume-warning {
+            color: #f39c12; /* Turuncu */
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+            display: none; /* Başlangıçta gizli */
+        }
+
+        /* Buton Stili */
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            text-transform: uppercase;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Yapay Zeka Butonu */
+        #ai-btn { background-color: #e74c3c; /* Kırmızı */ }
+        #ai-btn:hover { background-color: #c0392b; transform: translateY(-1px); }
+
+        /* Robotik Butonu */
+        #robot-btn { background-color: #3498db; /* Mavi */ }
+        #robot-btn:hover { background-color: #2980b9; transform: translateY(-1px); }
+
+        /* Geri Dön Butonu */
+        #back-btn {
+            background-color: #f39c12; /* Turuncu */
+            display: none;
+            margin-top: 15px;
+        }
+        #back-btn:hover { background-color: #e67e22; }
+        
+        /* Video Boyutları */
+        #video-player {
+            width: 800px;
+            height: auto; 
+            border: none;
+            background-color: black;
+        }
+        
+        /* Video alanı başlangıçta gizli */
+        #video-container {
+            display: none;
+        }
+        
+        /* Mobil Uyum */
+        @media (max-width: 850px) {
+            #video-player {
+                width: 90vw;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-menu">
+        <button id="ai-btn" class="btn">
+            Yapay Zeka Video Oynat
+        </button>
+
+        <button id="robot-btn" class="btn">
+            Robotik Video Oynat
+        </button>
+    </div>
+
+    <div id="video-container">
+        <video 
+            id="video-player" 
+            controls 
+            preload="auto"
+            autoplay 
+            muted> </video>
+
+        <p id="volume-warning">
+            🔊 Tarayıcı kısıtlaması nedeniyle video sessiz başladı. Lütfen oynatıcı üzerindeki ses simgesine tıklayın.
+        </p>
+        
+        <button id="back-btn" class="btn">
+            Geri Dön
+        </button>
+    </div>
+
+    <script>
+        const mainMenu = document.getElementById('main-menu');
+        const videoContainer = document.getElementById('video-container');
+        const videoPlayer = document.getElementById('video-player');
+        const backBtn = document.getElementById('back-btn');
+        const warning = document.getElementById('volume-warning');
+        
+        // --- YEREL DOSYA YOLLARI ---
+        // Lütfen bu yolların doğru olduğundan emin olun!
+        const AI_VIDEO_SRC = "yapayzeka/1.mp4"; 
+        const ROBOT_VIDEO_SRC = "video/1.mp4"; 
+        // -----------------------------
+        
+        /**
+         * Verilen video dosyasını yükler ve ekranı değiştirir.
+         * @param {string} videoSrc - Video dosyasının yolu (SRC)
+         */
+        function playVideo(videoSrc) {
+            // Butonları gizle, video alanını göster
+            mainMenu.style.display = 'none';
+            videoContainer.style.display = 'flex';
+            
+            // Video kaynağını ayarla
+            videoPlayer.src = videoSrc;
+            videoPlayer.load();
+
+            // Sesi baştan sessize alıyoruz (Tarayıcı kısıtlamasını aşmak için)
+            videoPlayer.muted = true;
+            
+            // Videoyu oynatmaya çalış
+            videoPlayer.play().then(() => {
+                // Başarılı oynatma durumunda uyarıyı göster
+                warning.style.display = 'block';
+            }).catch(error => {
+                // Hata durumunda (mesela dosya yolu yanlışsa)
+                console.error("Video başlatılamadı veya engellendi:", error);
+                alert("Video dosyası yüklenemedi. Lütfen dosya yollarını kontrol edin: " + videoSrc);
+                goBack(); // Menüye geri dön
+            });
+            
+            // Geri Dön butonunu göster
+            backBtn.style.display = 'block'; 
+        }
+
+        /**
+         * Ana menüye geri döner.
+         */
+        function goBack() {
+            // Video alanını gizle, menüyü göster
+            videoContainer.style.display = 'none';
+            mainMenu.style.display = 'flex';
+            
+            // Video oynatmayı durdur ve sessizliği kaldır
+            videoPlayer.pause(); 
+            videoPlayer.currentTime = 0; 
+
+            // Geri Dön butonunu ve uyarıyı gizle
+            backBtn.style.display = 'none';
+            warning.style.display = 'none';
+        }
+
+        // --- Olay Dinleyicileri ---
+        document.getElementById('ai-btn').addEventListener('click', () => {
+            playVideo(AI_VIDEO_SRC);
+        });
+
+        document.getElementById('robot-btn').addEventListener('click', () => {
+            playVideo(ROBOT_VIDEO_SRC);
+        });
+
+        backBtn.addEventListener('click', goBack);
+
+        // BONUS: Video bittiğinde otomatik menüye dönüş (Daha iyi kullanıcı deneyimi için)
+        videoPlayer.onended = function() {
+            alert("Video sona erdi. Menüye geri dönülüyor.");
+            goBack();
+        };
+    </script>
+
+</body>
+</html>
