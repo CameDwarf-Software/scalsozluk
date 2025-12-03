@@ -26,16 +26,33 @@
     max-width: 500px;
   }
 
+  /* --- ANİMASYON TANIMI BAŞLANGICI --- */
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px); /* 10px yukarı çıkar */
+    }
+    100% {
+      transform: translateY(0px); /* Tekrar yerine döner */
+    }
+  }
+  /* --- ANİMASYON TANIMI BİTİŞİ --- */
+
   .logo {
     width: 90px;
     margin-bottom:20px;
+    /* Animasyon burada çağırılıyor: İsmi 'float', süresi 3 saniye, yumuşak geçişli ve sonsuz döngü */
+    animation: float 1.7s ease-in-out infinite;
+    cursor: pointer;
   }
 
   .buttons {
     display:flex;
     gap:30px;
     justify-content:center;
-    flex-wrap:wrap; /* mobilde alt alta gelecek */
+    flex-wrap:wrap; 
   }
 
   button {
@@ -87,6 +104,9 @@
     .logo {
       width:70px;
     }
+    .logo:hover {
+      transform: scale(1.1);
+    }
   }
 
 </style>
@@ -94,6 +114,7 @@
 <body>
 
 <div class="menu-container">
+  <menu-container id="logo">
   <img src="matchGame/images/image.png" alt="Okul Logo" class="logo">
 
   <div class="buttons">
@@ -108,8 +129,8 @@
     </button>
 
     <button id="game3Btn">
-      <img src="matchGame/images/icon2.png" alt="İkinci Oyun Icon" class="btn-icon">
-      Atasözü Bulma Oyunu
+      <img src="matchGame/images/icon3.png" alt="İkinci Oyun Icon" class="btn-icon">
+      Deyim & Atasözü AVCISI
     </button>
   </div>
 </div>
@@ -125,10 +146,10 @@
   document.getElementById("game3Btn").addEventListener("click", ()=>{
     window.location.href = "https://tyavuzkarsliogullari.github.io/Atasozu-ve-Deyimler-Oyun/";
   });
+  document.getElementById("logo").addEventListener("click", ()=>{
+    window.location.href = "https://servetiyecephesianadolulisesi.meb.k12.tr/";
+  });
 </script>
 
 </body>
 </html>
-
-
-
