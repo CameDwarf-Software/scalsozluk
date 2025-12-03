@@ -21,8 +21,6 @@
         /* Logo ve Menü arasındaki boşluğu azaltmak için düzenleme */
         #logo-container {
             text-align: center;
-            /* Ana menüden ayırmak için önceki margin-bottom yerine,
-               bu iki ana blok arasındaki boşluğu düzenleyelim. */
             margin-bottom: 5px; 
         }
 
@@ -62,7 +60,14 @@
         }
         
         /* Diğer stiller (Butonlar, Video, vb.) değişmedi */
-        #volume-warning { display: none; }
+        #volume-warning { 
+            display: none; 
+            color: #f39c12; /* Uyarı metni rengi */
+            font-size: 14px;
+            text-align: center;
+            margin-top: -10px;
+        }
+
         .btn {
             padding: 15px 30px;
             font-size: 18px;
@@ -84,6 +89,7 @@
         #back-btn:hover { background-color: #e67e22; }
         #video-player { width: 800px; height: auto; border: none; background-color: black; }
         #video-container { display: none; }
+        
         @media (max-width: 850px) {
             #video-player { width: 90vw; }
         }
@@ -111,12 +117,11 @@
         <video 
             id="video-player" 
             controls 
-            preload="auto"
-            autoplay>
-        </video>
+            preload="auto"> 
+            </video>
         
         <p id="volume-warning">
-            🔊 Tarayıcı kısıtlaması nedeniyle video sessiz başladı. Lütfen oynatıcı üzerindeki ses simgesine tıklayın.
+            🔊 Tarayıcı kısıtlaması nedeniyle video sessiz başladı. Lütfen oynatıcı üzerindeki **ses simgesine** veya **oynat** butonuna manuel tıklayın.
         </p>
         
         <button id="back-btn" class="btn">
@@ -129,6 +134,7 @@
         const videoContainer = document.getElementById('video-container');
         const videoPlayer = document.getElementById('video-player');
         const backBtn = document.getElementById('back-btn');
+        const volumeWarning = document.getElementById('volume-warning');
         
         // --- YEREL DOSYA YOLLARI ---
         const AI_VIDEO_SRC = "yapayzeka/2.mp4"; 
@@ -142,6 +148,17 @@
             videoPlayer.src = videoSrc;
             videoPlayer.load();
             
+            // Videoyu oynatma denemesi
+            videoPlayer.play().then(() => {
+                // Başarıyla oynatılırsa uyarıyı gizle
+                volumeWarning.style.display = 'none';
+            }).catch(error => {
+                // Otomatik oynatma engellenirse (bu yaygındır)
+                console.error("Video otomatik başlatılamadı:", error);
+                // Kullanıcıya ses/oynatma uyarısını göster
+                volumeWarning.style.display = 'block';
+            });
+            
             backBtn.style.display = 'block'; 
         }
 
@@ -149,10 +166,12 @@
             videoContainer.style.display = 'none';
             mainMenu.style.display = 'flex';
             
+            // Geri dönerken videoyu durdur ve başa al
             videoPlayer.pause(); 
             videoPlayer.currentTime = 0; 
 
             backBtn.style.display = 'none';
+            volumeWarning.style.display = 'none'; // Geri dönerken uyarıyı gizle
         }
 
         // --- Olay Dinleyicileri ---
@@ -174,4 +193,3 @@
 
 </body>
 </html>
-
